@@ -100,6 +100,8 @@ class MessageController implements IMessageController {
     );
   }
 
+  // according to condition of task ( resolve without error ) I was needed to add try catch inside of callback 
+  // with potential error
   async saveMessages(messages: IParsedMessage[], file: TypeFilesOutputs): Promise<void> {
     await Promise.all(messages.map(async (item) => {
       try {
