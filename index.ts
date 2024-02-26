@@ -33,7 +33,7 @@ interface IFileParser {
 
 interface IMessageController {
   saveMessage: (onmessage: string, file: TypeFilesOutputs) => void;
-  saveMessages: (messages: IParsedMessage[], file: TypeFilesOutputs) => void;
+  saveMessages: (messages: IParsedMessage[], file: TypeFilesOutputs) => Promise<void>;
 }
 
 const mockResponses: IFilesMessages = {
@@ -100,12 +100,15 @@ class MessageController implements IMessageController {
     );
   }
 
-  saveMessages(messages: IParsedMessage[], file: TypeFilesOutputs): void {
-    messages.forEach(async (item) => {
-      await Helpers.delay(Math.random() * 5 * 1000);
-      this.saveMessage(item.message, file);
-    });
+  async saveMessages(messages: IParsedMessage[], file: TypeFilesOutputs): Promise<void> {
+    await Promise.all(messages.map(async (item) => {
+      try {
+        await Helpers.delay(Math.random() * 5 * 1000);
+        this.saveMessage(item.message, file);
+      } catch (error) {}
+    }));
   }
+  
 }
 
 class FileController {
@@ -131,7 +134,7 @@ class FileController {
           }
 
           const parsedMessages = this.parser.getParsedMessages(messages, input);
-          this.messageController.saveMessages(parsedMessages, output);
+          await this.messageController.saveMessages(parsedMessages, output);
 
           resolve();
         } catch (e) {
